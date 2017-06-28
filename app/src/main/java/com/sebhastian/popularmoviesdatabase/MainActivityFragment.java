@@ -3,6 +3,7 @@ package com.sebhastian.popularmoviesdatabase;
 import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -15,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.Toast;
 
@@ -43,7 +45,7 @@ public class MainActivityFragment extends Fragment {
         setHasOptionsMenu(true);
     }
 
-    final static String API_KEY = "set api key here";
+    final static String API_KEY = "you api here";
     final static String BASE_URL = "https://api.themoviedb.org/";
     final static String SORT_TOP_RATED = "3/movie/top_rated";
     final static String SORT_POPULAR = "3/movie/popular";
@@ -61,11 +63,20 @@ public class MainActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-        List<Movie> movies = new ArrayList<>();
+        final List<Movie> movies = new ArrayList<>();
         mMovieAdapter = new MovieAdapter(getActivity(), movies);
         mProgressDialog = new ProgressDialog(getActivity());
         GridView movieGrid = (GridView) rootView.findViewById(R.id.movies_grid);
         movieGrid.setAdapter(mMovieAdapter);
+
+        movieGrid.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Intent detailMovie = new Intent(getActivity(), DetailActivity.class);
+                detailMovie.putExtra("MOVIE_OBJ", movies.get(i));
+                startActivity(detailMovie);
+            }
+        });
 
         if(isConnected()){
             new MoviesDBQueryTask().execute(SORT_POPULAR);
@@ -216,7 +227,7 @@ public class MainActivityFragment extends Fragment {
             movie.setOriginalTitle(movieInfo.getString(TAG_ORIGINAL_TITLE));
             movie.setImageUrl(movieInfo.getString(TAG_POSTER_PATH));
             movie.setOverview(movieInfo.getString(TAG_OVERVIEW));
-            movie.setVoteAvg(movieInfo.getDouble(TAG_VOTE_AVERAGE));
+            movie.setVoteAvg(movieInfo.getString(TAG_VOTE_AVERAGE));
             movie.setReleaseDate(movieInfo.getString(TAG_RELEASE_DATE));
             movies.add(movie);
         }
