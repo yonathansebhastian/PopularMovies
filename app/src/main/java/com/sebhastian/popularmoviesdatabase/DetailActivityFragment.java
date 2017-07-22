@@ -12,6 +12,8 @@ import android.widget.TextView;
 import com.sebhastian.popularmoviesdatabase.model.Movie;
 import com.squareup.picasso.Picasso;
 
+import butterknife.BindView;
+
 /**
  * Created by Yonathan Sebhastian on 6/27/2017.
  */
@@ -19,18 +21,21 @@ import com.squareup.picasso.Picasso;
 public class DetailActivityFragment extends Fragment {
     private final String LOG_TAG = MainActivityFragment.class.getSimpleName();
     public Movie movie;
-    public TextView mTitleTextView,mOverviewTextView,mRatingTextView,mReleaseDateTextView;
-    public ImageView mPosterImageView;
+    
+    @BindView(R.id.movie_title)
+    TextView mTitleTextView;
+    @BindView(R.id.movie_desc)
+    TextView mOverviewTextView;
+    @BindView(R.id.movie_rating)
+    TextView mRatingTextView;
+    @BindView(R.id.movie_release_date)
+    TextView mReleaseDateTextView;
+    @BindView(R.id.movie_poster)
+    ImageView mPosterImageView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_detail, container, false);
-
-        mTitleTextView = (TextView)rootView.findViewById(R.id.movie_title);
-        mOverviewTextView = (TextView) rootView.findViewById(R.id.movie_desc);
-        mRatingTextView = (TextView) rootView.findViewById(R.id.movie_rating);
-        mReleaseDateTextView = (TextView) rootView.findViewById(R.id.movie_release_date);
-        mPosterImageView = (ImageView) rootView.findViewById(R.id.movie_poster);
 
         movie = getActivity().getIntent().getExtras().getParcelable("MOVIE_OBJ");
         Log.d(LOG_TAG, "movie"+movie.toString());
