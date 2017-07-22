@@ -1,25 +1,33 @@
-package com.sebhastian.popularmoviesdatabase;
+package com.sebhastian.popularmoviesdatabase.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import com.google.gson.annotations.SerializedName;
+import com.sebhastian.popularmoviesdatabase.Constants;
 
 /**
  * Created by Yonathan Sebhastian on 6/25/2017.
  */
 
 public class Movie implements Parcelable{
-    private static final String IMAGE_URL = "http://image.tmdb.org/t/p/w185";
     private static final String DATE_FORMAT = "yyyy-MM-dd";
+
+    @SerializedName("id")
+    private String id;
+    @SerializedName("original_title")
     private String originalTitle;
+    @SerializedName("poster_path")
     private String imageUrl;
+    @SerializedName("overview")
     private String overview;
+    @SerializedName("vote_average")
     private String voteAvg;
+    @SerializedName("release_date")
     private String releaseDate;
 
-    public Movie(){
-    }
-
     protected Movie(Parcel in) {
+        id = in.readString();
         originalTitle = in.readString();
         imageUrl = in.readString();
         overview = in.readString();
@@ -43,44 +51,28 @@ public class Movie implements Parcelable{
         return originalTitle;
     }
 
-    public void setOriginalTitle(String originalTitle) {
-        this.originalTitle = originalTitle;
-    }
 
     public String getImageUrl() {
         return imageUrl;
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
 
     public String getOverview() {
         return overview;
     }
 
-    public void setOverview(String overview) {
-        this.overview = overview;
-    }
 
     public String getVoteAvg() {
         return voteAvg+"/10";
     }
 
-    public void setVoteAvg(String voteAvg) {
-        this.voteAvg = voteAvg;
-    }
 
     public String getReleaseDate() {
         return releaseDate;
     }
 
-    public void setReleaseDate(String releaseDate) {
-        this.releaseDate = releaseDate;
-    }
-
     public String getImageUrlFull(){
-        return IMAGE_URL+getImageUrl();
+        return Constants.IMAGE_BASE_URL+Constants.IMAGE_SMALL_SIZE+getImageUrl();
     }
 
     @Override
@@ -90,6 +82,7 @@ public class Movie implements Parcelable{
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(id);
         parcel.writeString(originalTitle);
         parcel.writeString(imageUrl);
         parcel.writeString(overview);
