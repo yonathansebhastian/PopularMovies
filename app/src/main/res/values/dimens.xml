@@ -2,4 +2,14 @@
 <resources>
     <dimen name="text_size">30sp</dimen>
     <dimen name="text_padding">20dp</dimen>
+    <dimen name="movie_poster_layout_width">185dp</dimen>
+    <dimen name="movie_release_date_textsize">18sp</dimen>
+    <dimen name="movie_rating_paddingtop">10dp</dimen>
+    <dimen name="movie_rating_textsize">16sp</dimen>
+    <dimen name="trailer_width">150dp</dimen>
+    <dimen name="trailer_height">120dp</dimen>
+    <dimen name="detail_horizontal_padding">16dp</dimen>
+    <dimen name="detail_vertical_padding">8dp</dimen>
+    <dimen name="text_size_small">16sp</dimen>
+
 </resources>

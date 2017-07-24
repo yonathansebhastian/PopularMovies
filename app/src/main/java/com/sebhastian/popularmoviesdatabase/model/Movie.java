@@ -6,6 +6,11 @@ import android.os.Parcelable;
 import com.google.gson.annotations.SerializedName;
 import com.sebhastian.popularmoviesdatabase.Constants;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 /**
  * Created by Yonathan Sebhastian on 6/25/2017.
  */
@@ -61,14 +66,24 @@ public class Movie implements Parcelable{
         return overview;
     }
 
-
     public String getVoteAvg() {
-        return voteAvg+"/10";
+        return voteAvg+"/"+Constants.RATING_MAX;
     }
 
 
     public String getReleaseDate() {
-        return releaseDate;
+        SimpleDateFormat format = new SimpleDateFormat(DATE_FORMAT, Locale.US);
+        String date;
+        try {
+            Date newDate = format.parse(releaseDate);
+            // from string to date
+            format = new SimpleDateFormat("MMM dd, yyyy", Locale.US);
+            // back to string again
+            date = format.format(newDate);
+        } catch (ParseException e) {
+            return "TBD";
+        }
+        return date;
     }
 
     public String getImageUrlFull(){
@@ -89,5 +104,13 @@ public class Movie implements Parcelable{
         parcel.writeString(voteAvg);
         parcel.writeString(releaseDate);
 
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 }

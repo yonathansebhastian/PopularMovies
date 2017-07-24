@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.google.gson.annotations.SerializedName;
+import com.sebhastian.popularmoviesdatabase.Constants;
 
 /**
  * Created by Yonathan Sebhastian on 7/22/2017.
@@ -51,6 +52,10 @@ public class Trailer implements Parcelable {
 
     public String getTrailerKey() {
         return trailerKey;
+    }
+
+    public String getTrailerUrl() {
+        return Constants.YOUTUBE_PREFIX + trailerKey;
     }
 
     public void setTrailerKey(String trailerKey) {
