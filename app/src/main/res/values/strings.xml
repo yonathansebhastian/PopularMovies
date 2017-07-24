@@ -4,4 +4,12 @@
     <string name="action_refresh">Refresh</string>
     <string name="error_message">No Internet Connection. Get one and hit refresh!</string>
     <string name="poster_img_description">Poster image of the movie</string>
+    <string name="tool_movie_name">Iron Man 3</string>
+    <string name="tool_release_date">2013-03-16</string>
+    <string name="tool_ratings">5.2/10</string>
+    <string name="tool_overview">When Tony Stark\'s world is torn apart by a formidable terrorist called the Mandarin, he starts an odyssey of rebuilding and retribution.</string>
+    <string name="sort_by">Sort</string>
+    <string name="favorites">Sort by favorites</string>
+    <string name="share_trailer">Share trailer</string>
+
 </resources>
