@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent">
+
+        <FrameLayout
+            android:layout_marginLeft="@dimen/trailer_frame_layout_padding_horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <ImageView
+                android:id="@+id/trailer_thumbnail"
+                android:layout_width="@dimen/trailer_width"
+                android:layout_height="@dimen/trailer_height"
+                android:background="@color/color_white"
+                android:padding="1dp"
+                android:scaleType="fitCenter" />
+
+            <ImageView
+                android:id="@+id/image_play"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_play_button_inside_a_circle" />
+
+        </FrameLayout>
+
+        <TextView
+            android:id="@+id/trailer_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_gravity="center_vertical"
+            tools:text="Official Trailer USA" />
+    </LinearLayout>
+
+    <View
+        android:id="@+id/trailer_divider"
+        style="@style/DividerStyleTrailer"/>
+</LinearLayout>
