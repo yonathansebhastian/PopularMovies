@@ -7,7 +7,7 @@ package com.sebhastian.popularmoviesdatabase;
 public final class Constants {
     public static final String BASE_URL = "http://api.themoviedb.org/3/";
     public static final String APP_KEY_QUERY_PARAM = "api_key";
-    public static final String API_KEY = "6ebb54f8e2f0dc947db5f8755fe8b924";
+    public static final String API_KEY = "API KEY HERE";
     public static final String SORT_POPULARITY = "popular";
     public static final String SORT_RATING = "top_rated";
     public static final String SORT_FAVES = "favourites";
