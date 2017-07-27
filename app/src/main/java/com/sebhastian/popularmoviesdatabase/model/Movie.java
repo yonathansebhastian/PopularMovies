@@ -31,13 +31,23 @@ public class Movie implements Parcelable{
     @SerializedName("release_date")
     private String releaseDate;
 
-    protected Movie(Parcel in) {
+    private Movie(Parcel in) {
         id = in.readString();
         originalTitle = in.readString();
         imageUrl = in.readString();
         overview = in.readString();
         voteAvg = in.readString();
         releaseDate = in.readString();
+    }
+
+    public Movie(String id, String title, String poster, String overview, String userRating,
+                 String releaseDate) {
+        this.id = id;
+        originalTitle = title;
+        imageUrl = poster;
+        this.overview = overview;
+        voteAvg = userRating;
+        this.releaseDate = releaseDate;
     }
 
     public static final Creator<Movie> CREATOR = new Creator<Movie>() {

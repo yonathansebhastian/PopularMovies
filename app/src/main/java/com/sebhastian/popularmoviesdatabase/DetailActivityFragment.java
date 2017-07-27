@@ -1,11 +1,12 @@
 package com.sebhastian.popularmoviesdatabase;
 
 import android.app.Fragment;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.ShareActionProvider;
 import android.util.Log;
@@ -15,12 +16,14 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.sebhastian.popularmoviesdatabase.adapter.ReviewAdapter;
 import com.sebhastian.popularmoviesdatabase.adapter.TrailerAdapter;
+import com.sebhastian.popularmoviesdatabase.db.MovieContract;
 import com.sebhastian.popularmoviesdatabase.model.Movie;
 import com.sebhastian.popularmoviesdatabase.model.Review;
 import com.sebhastian.popularmoviesdatabase.model.Reviews;
@@ -43,7 +46,7 @@ import retrofit2.Response;
  * Created by Yonathan Sebhastian on 6/27/2017.
  */
 
-public class DetailActivityFragment extends Fragment implements ReviewAdapter.Callbacks, TrailerAdapter.Callbacks {
+public class DetailActivityFragment extends Fragment implements ReviewAdapter.Callbacks, TrailerAdapter.Callbacks{
     private final String LOG_TAG = MainActivityFragment.class.getSimpleName();
 
     public static final String SAVED_TRAILERS = "SAVED_TRAILERS";
@@ -69,6 +72,12 @@ public class DetailActivityFragment extends Fragment implements ReviewAdapter.Ca
     RecyclerView mRecyclerViewTrailerList;
     @BindView(R.id.review_list)
     RecyclerView mRecyclerViewReviewList;
+    @BindView(R.id.button_watch_trailer)
+    Button mButtonWatchTrailer;
+    @BindView(R.id.button_mark_as_favorite)
+    Button mButtonMarkAsFavorite;
+    @BindView(R.id.button_remove_from_favorites)
+    Button mButtonRemoveFavorite;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -104,9 +113,6 @@ public class DetailActivityFragment extends Fragment implements ReviewAdapter.Ca
             Picasso.with(getActivity()).load(mMovie.getImageUrlFull()).placeholder(R.drawable.placeholder)
                     .error(R.drawable.placeholder).into(mPosterImageView);
 
-            LinearLayoutManager layoutManager
-                    = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
-            mRecyclerViewTrailerList.setLayoutManager(layoutManager);
             mTrailerAdapter = new TrailerAdapter(new ArrayList<Trailer>(), this);
             mRecyclerViewTrailerList.setAdapter(mTrailerAdapter);
             mRecyclerViewTrailerList.setNestedScrollingEnabled(false);
@@ -114,7 +120,7 @@ public class DetailActivityFragment extends Fragment implements ReviewAdapter.Ca
             if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_TRAILERS)) {
                 List<Trailer> trailers = savedInstanceState.getParcelableArrayList(SAVED_TRAILERS);
                 mTrailerAdapter.add(trailers);
-//                mButtonWatchTrailer.setEnabled(true);
+                mButtonWatchTrailer.setEnabled(true);
             }
             else {
                 fetchTrailers(mMovie.getId());
@@ -125,11 +131,35 @@ public class DetailActivityFragment extends Fragment implements ReviewAdapter.Ca
             if (savedInstanceState != null && savedInstanceState.containsKey(SAVED_REVIEWS)) {
                 List<Review> reviews = savedInstanceState.getParcelableArrayList(SAVED_REVIEWS);
                 mReviewAdapter.add(reviews);
-//                mButtonWatchTrailer.setEnabled(true);
             }
             else {
                 fetchReviews(mMovie.getId());
             }
+
+            mButtonWatchTrailer.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    if (mTrailerAdapter.getItemCount() > 0) {
+                        watch(mTrailerAdapter.getTrailers().get(0), 0);
+                    }
+                }
+            });
+
+            mButtonMarkAsFavorite.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    markAsFavorite();
+                }
+            });
+
+            mButtonRemoveFavorite.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    removeFavorite();
+                }
+            });
+
+            updateFavoriteButtons();
 
         }
         return rootView;
@@ -168,6 +198,7 @@ public class DetailActivityFragment extends Fragment implements ReviewAdapter.Ca
                 List<Trailer> trailerList = response.body().getTrailers();
                 mTrailerAdapter.add(trailerList);
                 updateShareActionProvider();
+                mButtonWatchTrailer.setEnabled(true);
             }
 
             @Override
@@ -197,6 +228,66 @@ public class DetailActivityFragment extends Fragment implements ReviewAdapter.Ca
             shareIntent.putExtra(Intent.EXTRA_TEXT, mMovie.getOriginalTitle()+" - "+ trailer.getTrailerName() + ": "
                     + trailer.getTrailerUrl());
             mShareActionProvider.setShareIntent(shareIntent);
+        }
+    }
+
+    public void markAsFavorite(){
+
+        if (!isFavorite()) {
+            ContentValues movieValues = new ContentValues();
+            movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID,
+                    mMovie.getId());
+            movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_TITLE,
+                    mMovie.getOriginalTitle());
+            movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_POSTER_PATH,
+                    mMovie.getImageUrl());
+            movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_OVERVIEW,
+                    mMovie.getOverview());
+            movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVERAGE,
+                    mMovie.getVoteAvg());
+            movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_RELEASE_DATE,
+                    mMovie.getReleaseDate());
+            getActivity().getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI, movieValues);
+
+            Toast.makeText(getActivity(), R.string.added_to_favorites_message, Toast.LENGTH_SHORT).show();
+
+            updateFavoriteButtons();
+        }
+    }
+
+    private boolean isFavorite() {
+        Cursor movieCursor = getActivity().getContentResolver().query(
+                MovieContract.MovieEntry.CONTENT_URI,
+                new String[]{MovieContract.MovieEntry.COLUMN_MOVIE_ID},
+                MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = " + mMovie.getId(),
+                null,
+                null);
+
+        if (movieCursor != null && movieCursor.moveToFirst()) {
+            movieCursor.close();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private void removeFavorite() {
+        if (isFavorite()) {
+            getActivity().getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI,
+                    MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = " + mMovie.getId(), null);
+
+            Toast.makeText(getActivity(), getString(R.string.remove_from_favorites_message), Toast.LENGTH_SHORT).show();
+            updateFavoriteButtons();
+        }
+    }
+
+    private void updateFavoriteButtons() {
+        if (isFavorite()) {
+            mButtonRemoveFavorite.setVisibility(View.VISIBLE);
+            mButtonMarkAsFavorite.setVisibility(View.GONE);
+        } else {
+            mButtonMarkAsFavorite.setVisibility(View.VISIBLE);
+            mButtonRemoveFavorite.setVisibility(View.GONE);
         }
     }
 }

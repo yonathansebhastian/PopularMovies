@@ -11,5 +11,12 @@
     <string name="sort_by">Sort</string>
     <string name="favorites">Sort by favorites</string>
     <string name="share_trailer">Share trailer</string>
+    <string name="watch_trailer">Watch trailer</string>
+    <string name="add_to_favorites">Add to Favorites</string>
+    <string name="remove_from_favorites">Remove from Favorites</string>
+    <string name="text_title_trailers">Trailers</string>
+    <string name="text_title_reviews">Reviews</string>
+    <string name="remove_from_favorites_message">Removed from favorites</string>
+    <string name="added_to_favorites_message">Added to favorites</string>
 
 </resources>

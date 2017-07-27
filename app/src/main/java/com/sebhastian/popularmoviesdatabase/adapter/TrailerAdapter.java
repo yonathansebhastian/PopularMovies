@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.sebhastian.popularmoviesdatabase.R;
 import com.sebhastian.popularmoviesdatabase.model.Trailer;
@@ -55,6 +56,8 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.ViewHold
 
         holder.mTrailer = trailer;
         String thumbnailUrl = "http://img.youtube.com/vi/" + trailer.getTrailerKey() + "/0.jpg";
+        holder.mTrailerName.setText(trailer.getTrailerName());
+
         Picasso.with(context)
                 .load(thumbnailUrl)
                 .placeholder(R.drawable.trailer_placeholder)
@@ -67,6 +70,10 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.ViewHold
             }
         });
 
+        if(position == mTrailers.size()-1){
+            holder.mTrailerDivider.setVisibility(View.INVISIBLE);
+        }
+
     }
 
     @Override
@@ -78,6 +85,10 @@ public class TrailerAdapter extends RecyclerView.Adapter<TrailerAdapter.ViewHold
         public final View mView;
         @BindView(R.id.trailer_thumbnail)
         ImageView mThumbnailView;
+        @BindView(R.id.trailer_name)
+        TextView mTrailerName;
+        @BindView(R.id.trailer_divider)
+        View mTrailerDivider;
         public Trailer mTrailer;
 
         public ViewHolder(View view) {

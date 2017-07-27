@@ -1,9 +1,13 @@
 package com.sebhastian.popularmoviesdatabase;
 
 import android.app.Fragment;
+import android.app.LoaderManager;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
@@ -19,6 +23,7 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.sebhastian.popularmoviesdatabase.adapter.MovieAdapter;
+import com.sebhastian.popularmoviesdatabase.db.MovieContract;
 import com.sebhastian.popularmoviesdatabase.model.Movie;
 import com.sebhastian.popularmoviesdatabase.model.Movies;
 import com.sebhastian.popularmoviesdatabase.network.NetworkService;
@@ -37,8 +42,9 @@ import retrofit2.Response;
  * Created by Yonathan Sebhastian on 6/25/2017.
  */
 
-public class MainActivityFragment extends Fragment implements MovieAdapter.Callbacks {
+public class MainActivityFragment extends Fragment implements MovieAdapter.Callbacks, LoaderManager.LoaderCallbacks<Cursor> {
     private final String LOG_TAG = MainActivityFragment.class.getSimpleName();
+    private static final int MOVIE_LOADER_ID = 1;
 
     private static final String SAVED_MOVIES = "SAVED_MOVIES";
     private String mSortBy = Constants.SORT_POPULARITY;
@@ -92,11 +98,9 @@ public class MainActivityFragment extends Fragment implements MovieAdapter.Callb
             if (savedInstanceState.containsKey(SAVED_MOVIES)) {
                 List<Movie> movies = savedInstanceState.getParcelableArrayList(SAVED_MOVIES);
                 mMovieAdapter.add(movies);
-
-                // For listening content updates for tow pane mode
-//                if (mSortBy.equals(FetchMoviesTask.FAVORITES)) {
-//                    getSupportLoaderManager().initLoader(FAVORITE_MOVIES_LOADER, null, this);
-//                }
+            }
+            if (mSortBy.equals(Constants.SORT_FAVES)) {
+                getLoaderManager().initLoader(MOVIE_LOADER_ID, null, this);
             }
         } else {
             if(isConnected()){
@@ -151,26 +155,38 @@ public class MainActivityFragment extends Fragment implements MovieAdapter.Callb
                 mSortBy = Constants.SORT_RATING;
                 item.setChecked(true);
                 return true;
+            case R.id.sort_favorites:
+                fetchMovies(Constants.SORT_FAVES);
+                mSortBy = Constants.SORT_FAVES;
+                item.setChecked(true);
+                return true;
             default:
                 return true;
         }
     }
 
     public void fetchMovies(String sort_order) {
-        Call<Movies> moviesCall = networkService.getMovies(sort_order);
+        if (sort_order.equals(Constants.SORT_FAVES)){
 
-        moviesCall.enqueue(new Callback<Movies>() {
-            @Override
-            public void onResponse(Call<Movies> call, Response<Movies> response) {
-                Log.e(LOG_TAG, response.body().toString());
-                List<Movie> movieList = response.body().getMovies();
-                mMovieAdapter.add(movieList);
-            }
-            @Override
-            public void onFailure(Call<Movies> call, Throwable t) {
-                Toast.makeText(getActivity(), getString(R.string.error_message), Toast.LENGTH_SHORT).show();
-            }
-        });
+            getLoaderManager().initLoader(MOVIE_LOADER_ID, null, this);
+        }
+        else{
+            Call<Movies> moviesCall = networkService.getMovies(sort_order);
+
+            moviesCall.enqueue(new Callback<Movies>() {
+                @Override
+                public void onResponse(Call<Movies> call, Response<Movies> response) {
+                    Log.e(LOG_TAG, response.body().toString());
+                    List<Movie> movieList = response.body().getMovies();
+                    mMovieAdapter.add(movieList);
+                }
+                @Override
+                public void onFailure(Call<Movies> call, Throwable t) {
+                    Toast.makeText(getActivity(), getString(R.string.error_message), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+
     }
 
     @Override
@@ -179,4 +195,26 @@ public class MainActivityFragment extends Fragment implements MovieAdapter.Callb
         detailMovie.putExtra("MOVIE_OBJ", movie);
         startActivity(detailMovie);
     }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        return new CursorLoader(getActivity(),
+                MovieContract.MovieEntry.CONTENT_URI,
+                MovieContract.MovieEntry.MOVIE_COLUMNS,
+                null,
+                null,
+                null);
+    }
+
+    @Override
+    public void onLoadFinished(android.content.Loader<Cursor> loader, Cursor cursor) {
+        mMovieAdapter.add(cursor);
+
+    }
+
+    @Override
+    public void onLoaderReset(android.content.Loader<Cursor> loader) {
+
+    }
+
 }

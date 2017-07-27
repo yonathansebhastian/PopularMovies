@@ -1,6 +1,7 @@
 package com.sebhastian.popularmoviesdatabase.adapter;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.sebhastian.popularmoviesdatabase.R;
+import com.sebhastian.popularmoviesdatabase.db.MovieContract;
 import com.sebhastian.popularmoviesdatabase.model.Movie;
 import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
@@ -63,14 +65,14 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         Picasso.with(context)
                 .load(posterUrl)
                 .placeholder(R.drawable.placeholder)
-                .into(holder.mThumbnailView,
+                .into(holder.mMoviePoster,
                         new Callback() {
                             @Override
                             public void onSuccess() {
                                 if (holder.mMovie.getId() != movie.getId()) {
                                     holder.clean();
                                 } else {
-                                    holder.mThumbnailView.setVisibility(View.VISIBLE);
+                                    holder.mMoviePoster.setVisibility(View.VISIBLE);
                                 }
                             }
 
@@ -100,27 +102,44 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.ViewHolder> 
         notifyDataSetChanged();
     }
 
+    public void add(Cursor cursor) {
+        mMovies.clear();
+        if (cursor != null && cursor.moveToFirst()) {
+            do {
+                String id = cursor.getString(MovieContract.MovieEntry.COLUMN_MOVIE_ID_INDEX);
+                String title = cursor.getString(MovieContract.MovieEntry.COLUMN_MOVIE_TITLE_INDEX);
+                String posterPath = cursor.getString(MovieContract.MovieEntry.COLUMN_MOVIE_POSTER_PATH_INDEX);
+                String overview = cursor.getString(MovieContract.MovieEntry.COLUMN_MOVIE_OVERVIEW_INDEX);
+                String rating = cursor.getString(MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVERAGE_INDEX);
+                String releaseDate = cursor.getString(MovieContract.MovieEntry.COLUMN_MOVIE_RELEASE_DATE_INDEX);
+                Movie movie = new Movie(id, title, posterPath, overview, rating, releaseDate);
+                mMovies.add(movie);
+            } while (cursor.moveToNext());
+        }
+        notifyDataSetChanged();
+    }
+
     public interface Callbacks {
         void detail(Movie movie, int position);
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
+        private final View mView;
         @BindView(R.id.movie_poster)
-        ImageView mThumbnailView;
-        public Movie mMovie;
+        ImageView mMoviePoster;
+        private Movie mMovie;
 
-        public ViewHolder(View view) {
+        private ViewHolder(View view) {
             super(view);
             ButterKnife.bind(this, view);
             mView = view;
         }
 
-        public void clean() {
+        private void clean() {
             final Context context = mView.getContext();
-            Picasso.with(context).cancelRequest(mThumbnailView);
-            mThumbnailView.setImageBitmap(null);
-            mThumbnailView.setVisibility(View.INVISIBLE);
+            Picasso.with(context).cancelRequest(mMoviePoster);
+            mMoviePoster.setImageBitmap(null);
+            mMoviePoster.setVisibility(View.INVISIBLE);
         }
 
     }

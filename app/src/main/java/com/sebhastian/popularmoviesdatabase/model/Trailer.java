@@ -98,6 +98,5 @@ public class Trailer implements Parcelable {
         parcel.writeString(trailerName);
         parcel.writeString(trailerSite);
         parcel.writeString(trailerSize);
-
     }
 }
