@@ -5,6 +5,7 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.RecyclerView;
@@ -222,7 +223,6 @@ public class DetailActivityFragment extends Fragment implements ReviewAdapter.Ca
     private void updateShareActionProvider() {
         if (mTrailerAdapter.getItemCount()>0){
             Trailer trailer = mTrailerAdapter.getTrailers().get(0);
-            Log.e(LOG_TAG, trailer.getTrailerUrl());
             Intent shareIntent = new Intent(Intent.ACTION_SEND);
             shareIntent.setType("text/plain");
             shareIntent.putExtra(Intent.EXTRA_TEXT, mMovie.getOriginalTitle()+" - "+ trailer.getTrailerName() + ": "
@@ -233,26 +233,36 @@ public class DetailActivityFragment extends Fragment implements ReviewAdapter.Ca
 
     public void markAsFavorite(){
 
-        if (!isFavorite()) {
-            ContentValues movieValues = new ContentValues();
-            movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID,
-                    mMovie.getId());
-            movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_TITLE,
-                    mMovie.getOriginalTitle());
-            movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_POSTER_PATH,
-                    mMovie.getImageUrl());
-            movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_OVERVIEW,
-                    mMovie.getOverview());
-            movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVERAGE,
-                    mMovie.getVoteAvg());
-            movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_RELEASE_DATE,
-                    mMovie.getReleaseDate());
-            getActivity().getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI, movieValues);
+        new AsyncTask<Void, Void, Void>(){
 
-            Toast.makeText(getActivity(), R.string.added_to_favorites_message, Toast.LENGTH_SHORT).show();
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                Toast.makeText(getActivity(), R.string.added_to_favorites_message, Toast.LENGTH_SHORT).show();
+                updateFavoriteButtons();
+            }
 
-            updateFavoriteButtons();
-        }
+            @Override
+            protected Void doInBackground(Void... voids) {
+
+                if (!isFavorite()) {
+                    ContentValues movieValues = new ContentValues();
+                    movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_ID,
+                            mMovie.getId());
+                    movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_TITLE,
+                            mMovie.getOriginalTitle());
+                    movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_POSTER_PATH,
+                            mMovie.getImageUrl());
+                    movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_OVERVIEW,
+                            mMovie.getOverview());
+                    movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_VOTE_AVERAGE,
+                            mMovie.getVoteAvg());
+                    movieValues.put(MovieContract.MovieEntry.COLUMN_MOVIE_RELEASE_DATE,
+                            mMovie.getReleaseDate());
+                    getActivity().getContentResolver().insert(MovieContract.MovieEntry.CONTENT_URI, movieValues);
+                }
+                return null;
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
     private boolean isFavorite() {
@@ -272,13 +282,24 @@ public class DetailActivityFragment extends Fragment implements ReviewAdapter.Ca
     }
 
     private void removeFavorite() {
-        if (isFavorite()) {
-            getActivity().getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI,
-                    MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = " + mMovie.getId(), null);
+        new AsyncTask<Void, Void, Void>(){
 
-            Toast.makeText(getActivity(), getString(R.string.remove_from_favorites_message), Toast.LENGTH_SHORT).show();
-            updateFavoriteButtons();
-        }
+            @Override
+            protected Void doInBackground(Void... voids) {
+                if (isFavorite()) {
+                    getActivity().getContentResolver().delete(MovieContract.MovieEntry.CONTENT_URI,
+                            MovieContract.MovieEntry.COLUMN_MOVIE_ID + " = " + mMovie.getId(), null);
+                }
+                return null;
+            }
+
+            @Override
+            protected void onPostExecute(Void aVoid) {
+                Toast.makeText(getActivity(), getString(R.string.remove_from_favorites_message), Toast.LENGTH_SHORT).show();
+                updateFavoriteButtons();
+            }
+        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
     }
 
     private void updateFavoriteButtons() {

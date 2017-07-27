@@ -176,7 +176,6 @@ public class MainActivityFragment extends Fragment implements MovieAdapter.Callb
             moviesCall.enqueue(new Callback<Movies>() {
                 @Override
                 public void onResponse(Call<Movies> call, Response<Movies> response) {
-                    Log.e(LOG_TAG, response.body().toString());
                     List<Movie> movieList = response.body().getMovies();
                     mMovieAdapter.add(movieList);
                 }
@@ -185,6 +184,8 @@ public class MainActivityFragment extends Fragment implements MovieAdapter.Callb
                     Toast.makeText(getActivity(), getString(R.string.error_message), Toast.LENGTH_SHORT).show();
                 }
             });
+
+            getLoaderManager().destroyLoader(MOVIE_LOADER_ID);
         }
 
     }
